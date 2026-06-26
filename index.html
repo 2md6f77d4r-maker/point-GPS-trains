@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Carte trajet train GPS</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<style>
+  :root{
+    --bg:#0b1220;
+    --card:#111c31;
+    --card2:#16243d;
+    --text:#edf5ff;
+    --muted:#9fb3ce;
+    --line:#2d4264;
+    --accent:#39d3ff;
+    --accent2:#65ffb8;
+    --danger:#ff5e7a;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:radial-gradient(circle at top left,#17355d 0,#0b1220 42%,#050814 100%);
+    color:var(--text);
+  }
+  header{
+    padding:18px 18px 10px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  h1{font-size:22px;margin:0;font-weight:800;letter-spacing:.2px}
+  .badge{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.04)}
+  main{display:grid;grid-template-columns:420px 1fr;gap:14px;padding:0 14px 14px;height:calc(100vh - 72px);min-height:720px}
+  .panel,.mapWrap{background:rgba(17,28,49,.86);border:1px solid rgba(57,211,255,.22);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.32);overflow:hidden}
+  .panel{display:flex;flex-direction:column;min-height:0}
+  .section{padding:14px;border-bottom:1px solid var(--line)}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+  textarea{
+    width:100%;height:295px;resize:vertical;min-height:220px;
+    border:1px solid var(--line);border-radius:14px;padding:12px;
+    color:var(--text);background:#07101e;outline:none;font-size:13px;line-height:1.45;
+  }
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(57,211,255,.12)}
+  .buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  button{
+    border:0;border-radius:13px;padding:12px 13px;font-weight:800;cursor:pointer;color:#04101d;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 10px 26px rgba(57,211,255,.18);
+  }
+  button.secondary{background:#203451;color:var(--text);box-shadow:none;border:1px solid var(--line)}
+  button.danger{background:#3b1d2a;color:#ffdce5;box-shadow:none;border:1px solid #633047}
+  button:hover{filter:brightness(1.08)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .stat{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:10px}
+  .stat .n{font-size:20px;font-weight:900;color:var(--accent2)}
+  .stat .t{font-size:12px;color:var(--muted);margin-top:3px}
+  #message{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35}
+  #message.err{color:#ffb4c2}
+  .list{padding:12px;overflow:auto;min-height:0;flex:1}
+  .item{display:grid;grid-template-columns:34px 1fr;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
+  .num{width:30px;height:30px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06111d;display:flex;align-items:center;justify-content:center;font-weight:900}
+  .date{font-size:14px;font-weight:800}
+  .coord{font-size:12px;color:var(--muted);margin-top:4px;word-break:break-word}
+  .mapWrap{position:relative;min-height:580px}
+  #map{height:100%;width:100%;min-height:580px;background:#0b1220}
+  .leaflet-popup-content{font-family:Arial,Helvetica,sans-serif;line-height:1.35}
+  .markerLabel{background:linear-gradient(135deg,#39d3ff,#65ffb8);color:#06111d;border:2px solid white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+  .hint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:8px}
+  @media(max-width:900px){
+    main{grid-template-columns:1fr;height:auto;min-height:0}
+    .mapWrap,#map{height:72vh;min-height:460px}
+    textarea{height:240px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Carte chronologique des points GPS train</h1>
+  <div class="badge">Coller les notes GPS → tracer le chemin</div>
+</header>
+<main>
+  <section class="panel">
+    <div class="section">
+      <label for="input">Colle ici tes points GPS Apple Notes / Raccourcis</label>
+      <textarea id="input" spellcheck="false">🚆 Point 
+
+📅 Date : 26/06/2026
+🕒 Heure : 21:37:51
+
+📍 Lieu : Emplacement
+📍 Latitude : 49.13571288932491
+📍 Longitude : -0.3567686101810198
+
+🗺️ Lien Plans :
+https://maps.apple.com/?ll=49.13571288932491,-0.3567686101810198
+
+────────────────────────
+
+🚆 Point Train
+📅 Date : 26/06/2026
+🕒 Heure : 21:44:28
+📍 Lieu : Emplacement
+📍 Latitude : 49.13571596967638
+📍 Longitude : -0.3567813264984122</textarea>
+      <div class="buttons">
+        <button onclick="generateMap()">Créer la carte</button>
+        <button class="secondary" onclick="copyGeoJson()">Copier GeoJSON</button>
+        <button class="secondary" onclick="downloadCsv()">Télécharger CSV</button>
+        <button class="danger" onclick="clearAll()">Réinitialiser</button>
+      </div>
+      <div id="message">Les points sont triés par date et heure. La carte utilise OpenStreetMap : elle nécessite Internet pour afficher le fond de carte.</div>
+      <div class="hint">Format accepté : Date, Heure, Latitude, Longitude, avec ou sans emojis. Le lien Apple Plans n’est pas obligatoire.</div>
+    </div>
+    <div class="section">
+      <div class="stats">
+        <div class="stat"><div class="n" id="count">0</div><div class="t">points détectés</div></div>
+        <div class="stat"><div class="n" id="distance">0 m</div><div class="t">distance estimée</div></div>
+      </div>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+  <section class="mapWrap">
+    <div id="map"></div>
+  </section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+let map, routeLayer, markersLayer, currentPoints = [];
+
+function initMap(){
+  map = L.map('map', { zoomControl:true }).setView([49.18, -0.36], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+  routeLayer = L.layerGroup().addTo(map);
+  markersLayer = L.layerGroup().addTo(map);
+}
+
+function normalizeNumber(value){
+  return Number(String(value).replace(',', '.').trim());
+}
+
+function parseDateTime(dateStr, timeStr){
+  const d = dateStr.trim().match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(!d) return null;
+  const t = (timeStr || '00:00:00').trim().match(/(\d{1,2})[:hH](\d{1,2})(?::(\d{1,2}))?/);
+  const day = d[1].padStart(2,'0');
+  const month = d[2].padStart(2,'0');
+  let year = d[3];
+  if(year.length === 2) year = '20' + year;
+  const hh = t ? t[1].padStart(2,'0') : '00';
+  const mm = t ? t[2].padStart(2,'0') : '00';
+  const ss = t && t[3] ? t[3].padStart(2,'0') : '00';
+  return new Date(`${year}-${month}-${day}T${hh}:${mm}:${ss}`);
+}
+
+function parsePoints(text){
+  const blocks = text.split(/(?:─{5,}|\n\s*\n\s*\n|🚆\s*Point)/g).map(b => b.trim()).filter(Boolean);
+  const points = [];
+  for(const block of blocks){
+    const latMatch = block.match(/Latitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i);
+    const lonMatch = block.match(/Longitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i);
+    if(!latMatch || !lonMatch) continue;
+
+    const dateMatch = block.match(/Date\s*:\s*(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})/i);
+    const timeMatch = block.match(/Heure\s*:\s*(\d{1,2}[:hH]\d{1,2}(?::\d{1,2})?)/i);
+    const lieuMatch = block.match(/Lieu\s*:\s*(.+)/i);
+    const lat = normalizeNumber(latMatch[1]);
+    const lon = normalizeNumber(lonMatch[1]);
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    const dt = dateMatch ? parseDateTime(dateMatch[1], timeMatch ? timeMatch[1] : '00:00:00') : new Date(0);
+    points.push({
+      lat, lon,
+      date: dateMatch ? dateMatch[1] : '',
+      time: timeMatch ? timeMatch[1] : '',
+      lieu: lieuMatch ? lieuMatch[1].trim() : 'Emplacement',
+      dt: dt || new Date(0)
+    });
+  }
+  return points.sort((a,b) => a.dt - b.dt);
+}
+
+function haversine(a,b){
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
+function totalDistance(points){
+  let total = 0;
+  for(let i=1;i<points.length;i++) total += haversine(points[i-1], points[i]);
+  return total;
+}
+
+function formatDistance(m){
+  if(m >= 1000) return (m/1000).toFixed(2).replace('.', ',') + ' km';
+  return Math.round(m) + ' m';
+}
+
+function markerIcon(n){
+  return L.divIcon({
+    className:'',
+    html:`<div class="markerLabel">${n}</div>`,
+    iconSize:[30,30],
+    iconAnchor:[15,15],
+    popupAnchor:[0,-16]
+  });
+}
+
+function generateMap(){
+  const text = document.getElementById('input').value;
+  const points = parsePoints(text);
+  currentPoints = points;
+  routeLayer.clearLayers();
+  markersLayer.clearLayers();
+  document.getElementById('count').textContent = points.length;
+  document.getElementById('distance').textContent = formatDistance(totalDistance(points));
+  renderList(points);
+
+  const msg = document.getElementById('message');
+  msg.className = '';
+  if(points.length === 0){
+    msg.textContent = 'Aucun point détecté. Vérifie qu’il y a bien Latitude et Longitude dans le texte collé.';
+    msg.className = 'err';
+    return;
+  }
+  msg.textContent = points.length === 1 ? '1 point détecté. Ajoute au moins 2 points pour tracer une ligne.' : `${points.length} points détectés et reliés dans l’ordre chronologique.`;
+
+  const latlngs = points.map(p => [p.lat, p.lon]);
+  if(points.length > 1){
+    L.polyline(latlngs, { weight:5, opacity:.9 }).addTo(routeLayer);
+  }
+  points.forEach((p,i)=>{
+    const popup = `<b>Point ${i+1}</b><br>${escapeHtml(p.date)} ${escapeHtml(p.time)}<br>${escapeHtml(p.lieu)}<br>Lat : ${p.lat}<br>Lon : ${p.lon}<br><a target="_blank" href="https://maps.apple.com/?ll=${p.lat},${p.lon}">Ouvrir dans Plans</a>`;
+    L.marker([p.lat,p.lon], {icon:markerIcon(i+1)}).bindPopup(popup).addTo(markersLayer);
+  });
+  map.fitBounds(L.latLngBounds(latlngs), { padding:[35,35], maxZoom:18 });
+}
+
+function renderList(points){
+  const box = document.getElementById('list');
+  if(!points.length){ box.innerHTML=''; return; }
+  box.innerHTML = points.map((p,i)=>`
+    <div class="item">
+      <div class="num">${i+1}</div>
+      <div>
+        <div class="date">${escapeHtml(p.date)} ${escapeHtml(p.time)}</div>
+        <div class="coord">${escapeHtml(p.lieu)}<br>${p.lat}, ${p.lon}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str){
+  return String(str || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+function copyGeoJson(){
+  if(!currentPoints.length) generateMap();
+  if(!currentPoints.length) return;
+  const geojson = {
+    type:'FeatureCollection',
+    features:[
+      {
+        type:'Feature',
+        properties:{type:'trajet_train', points:currentPoints.length},
+        geometry:{type:'LineString', coordinates:currentPoints.map(p => [p.lon, p.lat])}
+      },
+      ...currentPoints.map((p,i)=>({
+        type:'Feature',
+        properties:{ordre:i+1,date:p.date,heure:p.time,lieu:p.lieu},
+        geometry:{type:'Point', coordinates:[p.lon,p.lat]}
+      }))
+    ]
+  };
+  navigator.clipboard.writeText(JSON.stringify(geojson,null,2)).then(()=>{
+    document.getElementById('message').textContent = 'GeoJSON copié dans le presse-papier.';
+  });
+}
+
+function downloadCsv(){
+  if(!currentPoints.length) generateMap();
+  if(!currentPoints.length) return;
+  const rows = [['ordre','date','heure','lieu','latitude','longitude']];
+  currentPoints.forEach((p,i)=>rows.push([i+1,p.date,p.time,p.lieu,p.lat,p.lon]));
+  const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(';')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'points_train_gps.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearAll(){
+  document.getElementById('input').value = '';
+  currentPoints = [];
+  routeLayer.clearLayers();
+  markersLayer.clearLayers();
+  renderList([]);
+  document.getElementById('count').textContent = '0';
+  document.getElementById('distance').textContent = '0 m';
+  document.getElementById('message').textContent = 'Zone réinitialisée.';
+  document.getElementById('message').className = '';
+}
+
+window.addEventListener('load', ()=>{
+  initMap();
+  generateMap();
+});
+</script>
+</body>
+</html>
