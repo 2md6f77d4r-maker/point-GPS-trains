@@ -3,322 +3,223 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Carte trajet train GPS</title>
+<title>Relecture trajet GPS train</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
-  :root{
-    --bg:#0b1220;
-    --card:#111c31;
-    --card2:#16243d;
-    --text:#edf5ff;
-    --muted:#9fb3ce;
-    --line:#2d4264;
-    --accent:#39d3ff;
-    --accent2:#65ffb8;
-    --danger:#ff5e7a;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:radial-gradient(circle at top left,#17355d 0,#0b1220 42%,#050814 100%);
-    color:var(--text);
-  }
-  header{
-    padding:18px 18px 10px;
-    display:flex;
-    gap:12px;
-    align-items:center;
-    justify-content:space-between;
-    flex-wrap:wrap;
-  }
-  h1{font-size:22px;margin:0;font-weight:800;letter-spacing:.2px}
-  .badge{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.04)}
-  main{display:grid;grid-template-columns:420px 1fr;gap:14px;padding:0 14px 14px;height:calc(100vh - 72px);min-height:720px}
-  .panel,.mapWrap{background:rgba(17,28,49,.86);border:1px solid rgba(57,211,255,.22);border-radius:18px;box-shadow:0 18px 45px rgba(0,0,0,.32);overflow:hidden}
-  .panel{display:flex;flex-direction:column;min-height:0}
-  .section{padding:14px;border-bottom:1px solid var(--line)}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
-  textarea{
-    width:100%;height:295px;resize:vertical;min-height:220px;
-    border:1px solid var(--line);border-radius:14px;padding:12px;
-    color:var(--text);background:#07101e;outline:none;font-size:13px;line-height:1.45;
-  }
-  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(57,211,255,.12)}
-  .buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-  button{
-    border:0;border-radius:13px;padding:12px 13px;font-weight:800;cursor:pointer;color:#04101d;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 10px 26px rgba(57,211,255,.18);
-  }
-  button.secondary{background:#203451;color:var(--text);box-shadow:none;border:1px solid var(--line)}
-  button.danger{background:#3b1d2a;color:#ffdce5;box-shadow:none;border:1px solid #633047}
-  button:hover{filter:brightness(1.08)}
-  .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .stat{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:10px}
-  .stat .n{font-size:20px;font-weight:900;color:var(--accent2)}
-  .stat .t{font-size:12px;color:var(--muted);margin-top:3px}
-  #message{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35}
-  #message.err{color:#ffb4c2}
-  .list{padding:12px;overflow:auto;min-height:0;flex:1}
-  .item{display:grid;grid-template-columns:34px 1fr;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
-  .num{width:30px;height:30px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06111d;display:flex;align-items:center;justify-content:center;font-weight:900}
-  .date{font-size:14px;font-weight:800}
-  .coord{font-size:12px;color:var(--muted);margin-top:4px;word-break:break-word}
-  .mapWrap{position:relative;min-height:580px}
-  #map{height:100%;width:100%;min-height:580px;background:#0b1220}
-  .leaflet-popup-content{font-family:Arial,Helvetica,sans-serif;line-height:1.35}
-  .markerLabel{background:linear-gradient(135deg,#39d3ff,#65ffb8);color:#06111d;border:2px solid white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 6px 14px rgba(0,0,0,.35)}
-  .hint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:8px}
-  @media(max-width:900px){
-    main{grid-template-columns:1fr;height:auto;min-height:0}
-    .mapWrap,#map{height:72vh;min-height:460px}
-    textarea{height:240px}
-  }
+:root{
+  --bg:#07101f;
+  --card:#0d1a2f;
+  --card2:#12243e;
+  --text:#edf7ff;
+  --muted:#9fb4cc;
+  --line:#2a4264;
+  --accent:#39d3ff;
+  --accent2:#68ffb2;
+  --warn:#ffd166;
+  --danger:#ff5e7a;
+  --shadow:0 20px 55px rgba(0,0,0,.38);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+body{
+  background:
+    radial-gradient(circle at 12% 0%,rgba(57,211,255,.24),transparent 34%),
+    radial-gradient(circle at 88% 8%,rgba(104,255,178,.16),transparent 30%),
+    linear-gradient(135deg,#07101f,#020611 74%);
+}
+header{
+  padding:16px 18px 10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+h1{font-size:22px;margin:0;font-weight:900;letter-spacing:.2px}
+.badge{font-size:13px;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.045);border-radius:999px;padding:8px 11px}
+main{display:grid;grid-template-columns:430px 1fr;gap:14px;padding:0 14px 14px;height:calc(100vh - 66px);min-height:730px}
+.panel,.mapWrap{background:rgba(13,26,47,.88);border:1px solid rgba(57,211,255,.22);border-radius:19px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(8px)}
+.panel{display:flex;flex-direction:column;min-height:0}
+.section{padding:14px;border-bottom:1px solid var(--line)}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+textarea{
+  width:100%;height:260px;resize:vertical;min-height:190px;border:1px solid var(--line);border-radius:15px;padding:12px;
+  color:var(--text);background:#050d19;outline:none;font-size:13px;line-height:1.45;
+}
+textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(57,211,255,.12)}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+button{
+  border:0;border-radius:13px;padding:11px 12px;font-weight:900;cursor:pointer;color:#03101d;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 12px 28px rgba(57,211,255,.18);
+}
+button.secondary{background:#203451;color:var(--text);box-shadow:none;border:1px solid var(--line)}
+button.danger{background:#3b1d2a;color:#ffdce5;box-shadow:none;border:1px solid #633047}
+button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.3)}
+button:hover:not(:disabled){filter:brightness(1.08)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:14px;padding:10px;min-height:68px}
+.stat .n{font-size:20px;font-weight:900;color:var(--accent2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .t{font-size:12px;color:var(--muted);margin-top:4px}
+#message{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.35}
+#message.err{color:#ffb4c2}
+#message.ok{color:#b8ffd8}
+.hint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:8px}
+.list{padding:12px;overflow:auto;min-height:0;flex:1}
+.item{display:grid;grid-template-columns:34px 1fr;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
+.item.active{border-color:var(--accent2);box-shadow:0 0 0 2px rgba(104,255,178,.12)}
+.num{width:30px;height:30px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06111d;display:flex;align-items:center;justify-content:center;font-weight:900}
+.date{font-size:14px;font-weight:900}.coord{font-size:12px;color:var(--muted);margin-top:4px;word-break:break-word;line-height:1.35}.speed{font-size:12px;color:#dff8ff;margin-top:5px}
+.mapWrap{position:relative;min-height:590px}.mapTop{position:absolute;z-index:500;top:14px;left:14px;right:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;pointer-events:none;flex-wrap:wrap}.chip{pointer-events:auto;background:rgba(5,13,25,.78);border:1px solid rgba(57,211,255,.35);border-radius:999px;padding:9px 12px;color:var(--text);font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.22)}.chip strong{color:var(--accent2)}
+#map{height:100%;width:100%;min-height:590px;background:#07101f}.leaflet-popup-content{font-family:Arial,Helvetica,sans-serif;line-height:1.35}.leaflet-control-layers{background:#07101f;color:#fff;border:1px solid var(--line)}
+.markerLabel{background:linear-gradient(135deg,#39d3ff,#65ffb8);color:#06111d;border:2px solid white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 6px 14px rgba(0,0,0,.35)}
+.trainMarker{font-size:28px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.55))}.progressWrap{display:grid;grid-template-columns:1fr 72px;gap:10px;align-items:center;margin-top:10px}.progress{height:10px;background:#07101e;border:1px solid var(--line);border-radius:999px;overflow:hidden}.bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s linear}.selects{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.selects select,.fileInput{width:100%;border:1px solid var(--line);border-radius:12px;background:#07101e;color:var(--text);padding:10px;outline:none}.privacy{font-size:12px;color:#d8e9ff;background:rgba(57,211,255,.08);border:1px solid rgba(57,211,255,.22);border-radius:12px;padding:9px;margin-top:10px;line-height:1.35}
+@media(max-width:920px){main{grid-template-columns:1fr;height:auto;min-height:0}.mapWrap,#map{height:72vh;min-height:470px}textarea{height:230px}}
 </style>
 </head>
 <body>
 <header>
-  <h1>Carte chronologique des points GPS train</h1>
-  <div class="badge">Coller les notes GPS → tracer le chemin</div>
+  <h1>Relecture chronologique GPS train</h1>
+  <div class="badge">Aucune donnée personnelle intégrée dans le code</div>
 </header>
 <main>
   <section class="panel">
     <div class="section">
-      <label for="input">Colle ici tes points GPS Apple Notes / Raccourcis</label>
-      <textarea id="input" spellcheck="false">🚆 Point 
+      <label for="input">Collez ici vos points GPS</label>
+      <textarea id="input" spellcheck="false" placeholder="Collez vos points ici. Exemple de format accepté :
 
-📅 Date : 26/06/2026
-🕒 Heure : 21:37:51
-
+🚆 Point Train
+📅 Date : JJ/MM/AAAA
+🕒 Heure : HH:MM:SS
 📍 Lieu : Emplacement
-📍 Latitude : 49.13571288932491
-📍 Longitude : -0.3567686101810198
-
-🗺️ Lien Plans :
-https://maps.apple.com/?ll=49.13571288932491,-0.3567686101810198
+📍 Latitude : 00.000000
+📍 Longitude : 00.000000
 
 ────────────────────────
 
-🚆 Point Train
-📅 Date : 26/06/2026
-🕒 Heure : 21:44:28
-📍 Lieu : Emplacement
-📍 Latitude : 49.13571596967638
-📍 Longitude : -0.3567813264984122</textarea>
+Puis recommencez avec le point suivant."></textarea>
       <div class="buttons">
-        <button onclick="generateMap()">Créer la carte</button>
+        <button onclick="generateMap()">Analyser / tracer</button>
+        <button class="secondary" id="playBtn" onclick="togglePlay()" disabled>Lecture</button>
         <button class="secondary" onclick="copyGeoJson()">Copier GeoJSON</button>
         <button class="secondary" onclick="downloadCsv()">Télécharger CSV</button>
+        <button class="secondary" onclick="downloadGpx()">Télécharger GPX</button>
+        <button class="secondary" onclick="downloadKml()">Télécharger KML</button>
+        <button class="secondary" onclick="toggleMarkers()">Masquer points</button>
         <button class="danger" onclick="clearAll()">Réinitialiser</button>
       </div>
-      <div id="message">Les points sont triés par date et heure. La carte utilise OpenStreetMap : elle nécessite Internet pour afficher le fond de carte.</div>
-      <div class="hint">Format accepté : Date, Heure, Latitude, Longitude, avec ou sans emojis. Le lien Apple Plans n’est pas obligatoire.</div>
-    </div>
-    <div class="section">
-      <div class="stats">
-        <div class="stat"><div class="n" id="count">0</div><div class="t">points détectés</div></div>
-        <div class="stat"><div class="n" id="distance">0 m</div><div class="t">distance estimée</div></div>
+      <input class="fileInput" type="file" id="fileInput" accept=".txt,.md,.csv,text/plain" onchange="loadTextFile(event)" style="margin-top:10px">
+      <div class="selects">
+        <select id="speedSelect"><option value="900">Lecture lente</option><option value="450" selected>Lecture normale</option><option value="180">Lecture rapide</option></select>
+        <select id="followSelect"><option value="yes" selected>Suivre le train</option><option value="no">Ne pas suivre</option></select>
       </div>
+      <div class="progressWrap"><div class="progress"><div class="bar" id="bar"></div></div><div id="progressText">0 %</div></div>
+      <div id="message">La carte utilise OpenStreetMap et nécessite Internet pour afficher le fond de carte. Le traitement se fait dans votre navigateur.</div>
+      <div class="privacy">Le fichier ne contient aucun point GPS, aucune adresse et aucune donnée personnelle. Les données apparaissent uniquement quand vous les collez.</div>
     </div>
+    <div class="section"><div class="stats">
+      <div class="stat"><div class="n" id="count">0</div><div class="t">points détectés</div></div>
+      <div class="stat"><div class="n" id="distance">0 m</div><div class="t">distance estimée</div></div>
+      <div class="stat"><div class="n" id="duration">-</div><div class="t">durée totale</div></div>
+      <div class="stat"><div class="n" id="avgSpeed">-</div><div class="t">vitesse moyenne</div></div>
+      <div class="stat"><div class="n" id="maxSpeed">-</div><div class="t">vitesse max estimée</div></div>
+      <div class="stat"><div class="n" id="period">-</div><div class="t">départ → arrivée</div></div>
+    </div></div>
     <div class="list" id="list"></div>
   </section>
   <section class="mapWrap">
+    <div class="mapTop"><div class="chip" id="liveChip">Point : <strong>-</strong></div><div class="chip" id="liveTime">Heure : <strong>-</strong></div></div>
     <div id="map"></div>
   </section>
 </main>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-let map, routeLayer, markersLayer, currentPoints = [];
+let map, routeLayer, markersLayer, movingLayer, trainMarker;
+let currentPoints = [], currentIndex = 0, timer = null, markersVisible = true;
 
 function initMap(){
-  map = L.map('map', { zoomControl:true }).setView([49.18, -0.36], 11);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
+  map = L.map('map',{zoomControl:true}).setView([46.7,2.4],6);
+  const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'});
+  const hot = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'});
+  osm.addTo(map);
+  L.control.layers({'OpenStreetMap':osm,'OSM clair':hot},null,{position:'bottomright'}).addTo(map);
   routeLayer = L.layerGroup().addTo(map);
   markersLayer = L.layerGroup().addTo(map);
+  movingLayer = L.layerGroup().addTo(map);
 }
-
-function normalizeNumber(value){
-  return Number(String(value).replace(',', '.').trim());
-}
-
-function parseDateTime(dateStr, timeStr){
-  const d = dateStr.trim().match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
-  if(!d) return null;
-  const t = (timeStr || '00:00:00').trim().match(/(\d{1,2})[:hH](\d{1,2})(?::(\d{1,2}))?/);
-  const day = d[1].padStart(2,'0');
-  const month = d[2].padStart(2,'0');
-  let year = d[3];
-  if(year.length === 2) year = '20' + year;
-  const hh = t ? t[1].padStart(2,'0') : '00';
-  const mm = t ? t[2].padStart(2,'0') : '00';
-  const ss = t && t[3] ? t[3].padStart(2,'0') : '00';
+function normalizeNumber(value){return Number(String(value).replace(',','.').trim())}
+function parseDateTime(dateStr,timeStr){
+  const d=String(dateStr||'').trim().match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/); if(!d)return null;
+  const t=String(timeStr||'00:00:00').trim().match(/(\d{1,2})[:hH](\d{1,2})(?::(\d{1,2}))?/);
+  const day=d[1].padStart(2,'0'), month=d[2].padStart(2,'0'); let year=d[3]; if(year.length===2)year='20'+year;
+  const hh=t?t[1].padStart(2,'0'):'00', mm=t?t[2].padStart(2,'0'):'00', ss=t&&t[3]?t[3].padStart(2,'0'):'00';
   return new Date(`${year}-${month}-${day}T${hh}:${mm}:${ss}`);
 }
-
 function parsePoints(text){
-  const blocks = text.split(/(?:─{5,}|\n\s*\n\s*\n|🚆\s*Point)/g).map(b => b.trim()).filter(Boolean);
-  const points = [];
+  const blocks=String(text||'').split(/(?:─{5,}|\n\s*\n\s*\n|🚆\s*Point(?:\s*Train)?)/g).map(b=>b.trim()).filter(Boolean);
+  const points=[];
   for(const block of blocks){
-    const latMatch = block.match(/Latitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i);
-    const lonMatch = block.match(/Longitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i);
-    if(!latMatch || !lonMatch) continue;
-
-    const dateMatch = block.match(/Date\s*:\s*(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})/i);
-    const timeMatch = block.match(/Heure\s*:\s*(\d{1,2}[:hH]\d{1,2}(?::\d{1,2})?)/i);
-    const lieuMatch = block.match(/Lieu\s*:\s*(.+)/i);
-    const lat = normalizeNumber(latMatch[1]);
-    const lon = normalizeNumber(lonMatch[1]);
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
-    const dt = dateMatch ? parseDateTime(dateMatch[1], timeMatch ? timeMatch[1] : '00:00:00') : new Date(0);
-    points.push({
-      lat, lon,
-      date: dateMatch ? dateMatch[1] : '',
-      time: timeMatch ? timeMatch[1] : '',
-      lieu: lieuMatch ? lieuMatch[1].trim() : 'Emplacement',
-      dt: dt || new Date(0)
-    });
+    const latMatch=block.match(/Latitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i) || block.match(/lat\s*[:=]\s*([-+]?\d+(?:[\.,]\d+)?)/i);
+    const lonMatch=block.match(/Longitude\s*:\s*([-+]?\d+(?:[\.,]\d+)?)/i) || block.match(/lon(?:gitude)?\s*[:=]\s*([-+]?\d+(?:[\.,]\d+)?)/i);
+    if(!latMatch||!lonMatch)continue;
+    const dateMatch=block.match(/Date\s*:\s*(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4})/i);
+    const timeMatch=block.match(/Heure\s*:\s*(\d{1,2}[:hH]\d{1,2}(?::\d{1,2})?)/i);
+    const lieuMatch=block.match(/Lieu\s*:\s*(.+)/i);
+    const lat=normalizeNumber(latMatch[1]), lon=normalizeNumber(lonMatch[1]);
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)continue;
+    const dt=dateMatch?parseDateTime(dateMatch[1],timeMatch?timeMatch[1]:'00:00:00'):new Date(0);
+    points.push({lat,lon,date:dateMatch?dateMatch[1]:'',time:timeMatch?timeMatch[1]:'',lieu:lieuMatch?lieuMatch[1].trim():'Emplacement',dt:dt||new Date(0),block});
   }
-  return points.sort((a,b) => a.dt - b.dt);
+  return points.sort((a,b)=>a.dt-b.dt);
 }
-
-function haversine(a,b){
-  const R = 6371000;
-  const toRad = x => x * Math.PI / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-  const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
-  return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
-}
-
-function totalDistance(points){
-  let total = 0;
-  for(let i=1;i<points.length;i++) total += haversine(points[i-1], points[i]);
-  return total;
-}
-
-function formatDistance(m){
-  if(m >= 1000) return (m/1000).toFixed(2).replace('.', ',') + ' km';
-  return Math.round(m) + ' m';
-}
-
-function markerIcon(n){
-  return L.divIcon({
-    className:'',
-    html:`<div class="markerLabel">${n}</div>`,
-    iconSize:[30,30],
-    iconAnchor:[15,15],
-    popupAnchor:[0,-16]
-  });
-}
-
+function haversine(a,b){const R=6371000,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),lat1=toRad(a.lat),lat2=toRad(b.lat);const x=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 2*R*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+function totalDistance(points){let total=0;for(let i=1;i<points.length;i++)total+=haversine(points[i-1],points[i]);return total}
+function formatDistance(m){return m>=1000?(m/1000).toFixed(2).replace('.',',')+' km':Math.round(m)+' m'}
+function formatDuration(ms){if(!Number.isFinite(ms)||ms<=0)return '-';let s=Math.round(ms/1000),h=Math.floor(s/3600);s-=h*3600;let m=Math.floor(s/60);s-=m*60;return (h?h+'h ':'')+String(m).padStart(2,'0')+'min '+String(s).padStart(2,'0')+'s'}
+function speedKmh(a,b){const d=haversine(a,b);const dt=(b.dt-a.dt)/1000;return dt>0?(d/dt)*3.6:0}
+function markerIcon(n){return L.divIcon({className:'',html:`<div class="markerLabel">${n}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-16]})}
+function trainIcon(){return L.divIcon({className:'',html:'<div class="trainMarker">🚆</div>',iconSize:[36,36],iconAnchor:[18,18]})}
+function colorBySpeed(v){if(v<20)return '#68ffb2';if(v<60)return '#39d3ff';if(v<100)return '#ffd166';return '#ff5e7a'}
 function generateMap(){
-  const text = document.getElementById('input').value;
-  const points = parsePoints(text);
-  currentPoints = points;
-  routeLayer.clearLayers();
-  markersLayer.clearLayers();
-  document.getElementById('count').textContent = points.length;
-  document.getElementById('distance').textContent = formatDistance(totalDistance(points));
-  renderList(points);
-
-  const msg = document.getElementById('message');
-  msg.className = '';
-  if(points.length === 0){
-    msg.textContent = 'Aucun point détecté. Vérifie qu’il y a bien Latitude et Longitude dans le texte collé.';
-    msg.className = 'err';
-    return;
-  }
-  msg.textContent = points.length === 1 ? '1 point détecté. Ajoute au moins 2 points pour tracer une ligne.' : `${points.length} points détectés et reliés dans l’ordre chronologique.`;
-
-  const latlngs = points.map(p => [p.lat, p.lon]);
-  if(points.length > 1){
-    L.polyline(latlngs, { weight:5, opacity:.9 }).addTo(routeLayer);
-  }
-  points.forEach((p,i)=>{
-    const popup = `<b>Point ${i+1}</b><br>${escapeHtml(p.date)} ${escapeHtml(p.time)}<br>${escapeHtml(p.lieu)}<br>Lat : ${p.lat}<br>Lon : ${p.lon}<br><a target="_blank" href="https://maps.apple.com/?ll=${p.lat},${p.lon}">Ouvrir dans Plans</a>`;
-    L.marker([p.lat,p.lon], {icon:markerIcon(i+1)}).bindPopup(popup).addTo(markersLayer);
-  });
-  map.fitBounds(L.latLngBounds(latlngs), { padding:[35,35], maxZoom:18 });
+  stopPlay(); const points=parsePoints(document.getElementById('input').value); currentPoints=points; currentIndex=0;
+  routeLayer.clearLayers(); markersLayer.clearLayers(); movingLayer.clearLayers();
+  renderStats(points); renderList(points); setProgress(0); updateLive(null,0);
+  const msg=document.getElementById('message'); msg.className=''; document.getElementById('playBtn').disabled=points.length<2;
+  if(points.length===0){msg.textContent='Aucun point détecté. Vérifiez que le texte contient Latitude et Longitude.';msg.className='err';return}
+  msg.textContent=points.length===1?'1 point détecté. Ajoutez au moins 2 points pour tracer un trajet.':`${points.length} points détectés et reliés dans l’ordre chronologique.`;msg.className='ok';
+  const latlngs=points.map(p=>[p.lat,p.lon]);
+  for(let i=1;i<points.length;i++){L.polyline([[points[i-1].lat,points[i-1].lon],[points[i].lat,points[i].lon]],{weight:5,opacity:.92,color:colorBySpeed(speedKmh(points[i-1],points[i]))}).addTo(routeLayer)}
+  points.forEach((p,i)=>{const sp=i>0?speedKmh(points[i-1],p):0;const popup=`Point ${i+1}<br>${escapeHtml(p.date)} ${escapeHtml(p.time)}<br>${escapeHtml(p.lieu)}<br>Lat : ${p.lat}<br>Lon : ${p.lon}<br>${i>0?'Vitesse segment : '+sp.toFixed(1).replace('.',',')+' km/h<br>':''}<a target="_blank" href="https://maps.apple.com/?ll=${p.lat},${p.lon}">Ouvrir dans Plans</a>`;L.marker([p.lat,p.lon],{icon:markerIcon(i+1)}).bindPopup(popup).addTo(markersLayer)});
+  trainMarker=L.marker([points[0].lat,points[0].lon],{icon:trainIcon(),zIndexOffset:1000}).addTo(movingLayer); updateLive(points[0],1); highlightItem(0);
+  map.fitBounds(L.latLngBounds(latlngs),{padding:[35,35],maxZoom:18});
 }
-
-function renderList(points){
-  const box = document.getElementById('list');
-  if(!points.length){ box.innerHTML=''; return; }
-  box.innerHTML = points.map((p,i)=>`
-    <div class="item">
-      <div class="num">${i+1}</div>
-      <div>
-        <div class="date">${escapeHtml(p.date)} ${escapeHtml(p.time)}</div>
-        <div class="coord">${escapeHtml(p.lieu)}<br>${p.lat}, ${p.lon}</div>
-      </div>
-    </div>
-  `).join('');
+function renderStats(points){
+  const total=totalDistance(points), first=points[0], last=points[points.length-1], dur=points.length>1?(last.dt-first.dt):0;
+  let max=0;for(let i=1;i<points.length;i++)max=Math.max(max,speedKmh(points[i-1],points[i]));
+  const avg=dur>0?(total/(dur/1000))*3.6:0;
+  document.getElementById('count').textContent=points.length; document.getElementById('distance').textContent=formatDistance(total);
+  document.getElementById('duration').textContent=points.length>1?formatDuration(dur):'-'; document.getElementById('avgSpeed').textContent=avg?avg.toFixed(1).replace('.',',')+' km/h':'-';
+  document.getElementById('maxSpeed').textContent=max?max.toFixed(1).replace('.',',')+' km/h':'-';
+  document.getElementById('period').textContent=points.length>1?`${first.time||'-'} → ${last.time||'-'}`:'-';
 }
-
-function escapeHtml(str){
-  return String(str || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-}
-
-function copyGeoJson(){
-  if(!currentPoints.length) generateMap();
-  if(!currentPoints.length) return;
-  const geojson = {
-    type:'FeatureCollection',
-    features:[
-      {
-        type:'Feature',
-        properties:{type:'trajet_train', points:currentPoints.length},
-        geometry:{type:'LineString', coordinates:currentPoints.map(p => [p.lon, p.lat])}
-      },
-      ...currentPoints.map((p,i)=>({
-        type:'Feature',
-        properties:{ordre:i+1,date:p.date,heure:p.time,lieu:p.lieu},
-        geometry:{type:'Point', coordinates:[p.lon,p.lat]}
-      }))
-    ]
-  };
-  navigator.clipboard.writeText(JSON.stringify(geojson,null,2)).then(()=>{
-    document.getElementById('message').textContent = 'GeoJSON copié dans le presse-papier.';
-  });
-}
-
-function downloadCsv(){
-  if(!currentPoints.length) generateMap();
-  if(!currentPoints.length) return;
-  const rows = [['ordre','date','heure','lieu','latitude','longitude']];
-  currentPoints.forEach((p,i)=>rows.push([i+1,p.date,p.time,p.lieu,p.lat,p.lon]));
-  const csv = rows.map(r => r.map(v => '"' + String(v).replaceAll('"','""') + '"').join(';')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'points_train_gps.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function clearAll(){
-  document.getElementById('input').value = '';
-  currentPoints = [];
-  routeLayer.clearLayers();
-  markersLayer.clearLayers();
-  renderList([]);
-  document.getElementById('count').textContent = '0';
-  document.getElementById('distance').textContent = '0 m';
-  document.getElementById('message').textContent = 'Zone réinitialisée.';
-  document.getElementById('message').className = '';
-}
-
-window.addEventListener('load', ()=>{
-  initMap();
-  generateMap();
-});
+function renderList(points){const box=document.getElementById('list'); if(!points.length){box.innerHTML='';return} box.innerHTML=points.map((p,i)=>{const sp=i>0?speedKmh(points[i-1],p):0;return `<div class="item" id="item-${i}"><div class="num">${i+1}</div><div><div class="date">${escapeHtml(p.date)} ${escapeHtml(p.time)}</div><div class="coord">${escapeHtml(p.lieu)}<br>${p.lat}, ${p.lon}</div>${i>0?`<div class="speed">Segment : ${formatDistance(haversine(points[i-1],p))} · ${sp.toFixed(1).replace('.',',')} km/h</div>`:''}</div></div>`}).join('')}
+function highlightItem(i){document.querySelectorAll('.item').forEach(el=>el.classList.remove('active'));const el=document.getElementById('item-'+i);if(el){el.classList.add('active');el.scrollIntoView({block:'nearest',behavior:'smooth'})}}
+function updateLive(p,n){document.getElementById('liveChip').innerHTML=`Point : <strong>${p?n:'-'}</strong>`;document.getElementById('liveTime').innerHTML=`Heure : <strong>${p?escapeHtml((p.date+' '+p.time).trim()):'-'}</strong>`}
+function setProgress(v){const pct=Math.max(0,Math.min(100,v));document.getElementById('bar').style.width=pct+'%';document.getElementById('progressText').textContent=Math.round(pct)+' %'}
+function togglePlay(){timer?stopPlay():startPlay()}
+function startPlay(){if(currentPoints.length<2)return;document.getElementById('playBtn').textContent='Pause';timer=setInterval(()=>{currentIndex++;if(currentIndex>=currentPoints.length){stopPlay();return}const p=currentPoints[currentIndex];trainMarker.setLatLng([p.lat,p.lon]);updateLive(p,currentIndex+1);highlightItem(currentIndex);setProgress((currentIndex/(currentPoints.length-1))*100);if(document.getElementById('followSelect').value==='yes')map.panTo([p.lat,p.lon],{animate:true,duration:.35})},Number(document.getElementById('speedSelect').value)||450)}
+function stopPlay(){if(timer)clearInterval(timer);timer=null;document.getElementById('playBtn').textContent='Lecture'}
+function toggleMarkers(){markersVisible=!markersVisible;if(markersVisible){map.addLayer(markersLayer)}else{map.removeLayer(markersLayer)}}
+function escapeHtml(str){return String(str||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function copyGeoJson(){if(!currentPoints.length)generateMap();if(!currentPoints.length)return;const geojson={type:'FeatureCollection',features:[{type:'Feature',properties:{type:'trajet_train',points:currentPoints.length},geometry:{type:'LineString',coordinates:currentPoints.map(p=>[p.lon,p.lat])}},...currentPoints.map((p,i)=>({type:'Feature',properties:{ordre:i+1,date:p.date,heure:p.time,lieu:p.lieu},geometry:{type:'Point',coordinates:[p.lon,p.lat]}}))]};navigator.clipboard.writeText(JSON.stringify(geojson,null,2)).then(()=>msg('GeoJSON copié dans le presse-papier.','ok'))}
+function downloadCsv(){if(!currentPoints.length)generateMap();if(!currentPoints.length)return;const rows=[['ordre','date','heure','lieu','latitude','longitude','vitesse_segment_kmh']];currentPoints.forEach((p,i)=>rows.push([i+1,p.date,p.time,p.lieu,p.lat,p.lon,i>0?speedKmh(currentPoints[i-1],p).toFixed(1):'']));downloadText('points_train_gps.csv',rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(';')).join('\n'),'text/csv;charset=utf-8')}
+function downloadGpx(){if(!currentPoints.length)generateMap();if(!currentPoints.length)return;const trk=currentPoints.map(p=>`<trkpt lat="${p.lat}" lon="${p.lon}"><time>${p.dt.toISOString()}</time><name>${escapeXml((p.date+' '+p.time).trim())}</name></trkpt>`).join('\n');downloadText('trajet_train.gpx',`<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Relecture GPS Train"><trk><name>Trajet train GPS</name><trkseg>${trk}</trkseg></trk></gpx>`,'application/gpx+xml')}
+function downloadKml(){if(!currentPoints.length)generateMap();if(!currentPoints.length)return;const coords=currentPoints.map(p=>`${p.lon},${p.lat},0`).join(' ');downloadText('trajet_train.kml',`<?xml version="1.0" encoding="UTF-8"?><kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>Trajet train GPS</name><Placemark><LineString><coordinates>${coords}</coordinates></LineString></Placemark></Document></kml>`,'application/vnd.google-earth.kml+xml')}
+function escapeXml(s){return String(s||'').replace(/[<>&'"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]))}
+function downloadText(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url)}
+function clearAll(){stopPlay();document.getElementById('input').value='';currentPoints=[];currentIndex=0;routeLayer.clearLayers();markersLayer.clearLayers();movingLayer.clearLayers();renderList([]);renderStats([]);setProgress(0);updateLive(null,0);document.getElementById('playBtn').disabled=true;msg('Zone réinitialisée.','')}
+function msg(text,cls){const m=document.getElementById('message');m.textContent=text;m.className=cls||''}
+function loadTextFile(event){const file=event.target.files&&event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{document.getElementById('input').value=e.target.result;generateMap()};reader.readAsText(file,'UTF-8')}
+window.addEventListener('load',()=>{initMap()});
 </script>
 </body>
 </html>
